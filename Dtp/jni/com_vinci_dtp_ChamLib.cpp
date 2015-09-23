@@ -32,7 +32,6 @@ static float chamfer(jlong addDrawing, jlong addImage) {
 
 	cvtColor(tpl,tpl,CV_BGR2GRAY);
 
-
 	//get Bounding rect and crop excessive mat areas
 	cropBounding(tpl,tpl);
 
@@ -62,6 +61,10 @@ static float chamfer(jlong addDrawing, jlong addImage) {
 
 	//rectangle(img, bestRect, Scalar(0,0,0));
 	jfloat myScore;
+
+
+	imwrite("/storage/emulated/test.png", img);
+
 	return myScore = computeScore(img, tpl, bestRect);
 
 }
@@ -130,8 +133,9 @@ jfloat computeScore(Mat img, Mat tpl, Rect box){
 	 jfloat TotalNumberOfPixels = img.rows * img.cols;
 	 jfloat ZeroPixels = TotalNumberOfPixels - countNonZero(img);
 
-	for (int i = 0;  i < tpl.rows; ++ i) {
-		for (int j = 0; j < tpl.cols; ++ j) {
+	 jint i, j;
+	for (i = 0;  i < tpl.rows; ++ i) {
+		for (j = 0; j < tpl.cols; ++ j) {
 			if (tpl.at<uchar>(Point(j,i)) == 0) {
 				img.at<uchar>(Point(j+box.x,i+box.y)) = 100;
 			}

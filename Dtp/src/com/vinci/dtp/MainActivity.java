@@ -4,6 +4,7 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 import com.vinci.dtp.R;
@@ -11,7 +12,7 @@ import com.vinci.dtp.R;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -94,15 +95,17 @@ public void onClick(View view) {
 				
 				long t = System.currentTimeMillis();
 				
-				image.buildDrawingCache();
-				Bitmap bmap1 = image.getDrawingCache();
-				Mat imageMat = new Mat();
-				Utils.bitmapToMat(bmap1, imageMat);
+				BitmapDrawable drawable1 = (BitmapDrawable) image.getDrawable();
+			    Bitmap imageBmap = drawable1.getBitmap();
 				
-				drawing.buildDrawingCache();
-				Bitmap bmap2 = drawing.getDrawingCache();
-				Mat drawingMat = new Mat();
-				Utils.bitmapToMat(bmap2, drawingMat);
+			    BitmapDrawable drawable2 = (BitmapDrawable) drawing.getDrawable();
+			    Bitmap drawingBmap = drawable2.getBitmap();
+			    
+				Mat imageMat = new Mat(imageBmap.getHeight(), imageBmap.getWidth(), CvType.CV_8UC1);
+				Mat drawingMat = new Mat(drawingBmap.getHeight(), drawingBmap.getWidth(), CvType.CV_8UC1);
+				
+				Utils.bitmapToMat(imageBmap, imageMat);
+				Utils.bitmapToMat(drawingBmap, drawingMat);
 				
 				float result = 0;
 				result = ChamLib.getScore(imageMat.getNativeObjAddr(), drawingMat.getNativeObjAddr());
