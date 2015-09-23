@@ -6,6 +6,8 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import com.vinci.dtp.R;
 
@@ -107,8 +109,11 @@ public void onClick(View view) {
 				Utils.bitmapToMat(imageBmap, imageMat);
 				Utils.bitmapToMat(drawingBmap, drawingMat);
 				
+				//Imgcodecs.imwrite("/storage/emulated/0/image1.png",imageMat);
+				//Imgcodecs.imwrite("/storage/emulated/0/image2.png",drawingMat);
+				
 				float result = 0;
-				result = ChamLib.getScore(imageMat.getNativeObjAddr(), drawingMat.getNativeObjAddr());
+				result = ChamLib.getScore(drawingMat.getNativeObjAddr(), imageMat.getNativeObjAddr());
 				
 				t = System.currentTimeMillis() - t;
 				

@@ -11,12 +11,14 @@
 using namespace std;
 using namespace cv;
 
+extern "C" {
 jfloat chamferMatcher(Mat distImg, Mat tpl);
 void getSlidingWindows(Mat& image,int winWidth,int winHeight,vector<Rect>& rects);
 void cropBounding(Mat src, Mat& dst);
 jfloat computeScore(Mat img, Mat tpl, Rect box);
 static jfloat chamfer(jlong addDrawing, jlong addImage);
-
+JNIEXPORT jfloat JNICALL Java_com_vinci_dtp_ChamLib_getScore
+  (JNIEnv *env, jclass clazz, jlong addrDrawing, jlong addrImage);
 
 JNIEXPORT jfloat JNICALL Java_com_vinci_dtp_ChamLib_getScore
   (JNIEnv *env, jclass clazz, jlong addrDrawing, jlong addrImage){
@@ -29,8 +31,13 @@ static float chamfer(jlong addDrawing, jlong addImage) {
 	Mat& img = *(Mat*) addImage;
 
 	cvtColor(img,img,CV_BGR2GRAY);
-
 	cvtColor(tpl,tpl,CV_BGR2GRAY);
+
+	/*Mat tpl = imread("/storage/emulated/0/logo.png", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat img = imread("/storage/emulated/0/logo_in_clutter.png", CV_LOAD_IMAGE_GRAYSCALE);*/
+
+	imwrite("/storage/emulated/0/image1.png", tpl);
+	imwrite("/storage/emulated/0/image2.png", img);
 
 	//get Bounding rect and crop excessive mat areas
 	cropBounding(tpl,tpl);
@@ -60,13 +67,11 @@ static float chamfer(jlong addDrawing, jlong addImage) {
 	}
 
 	//rectangle(img, bestRect, Scalar(0,0,0));
-	jfloat myScore;
+	jfloat myScore = computeScore(img, tpl, bestRect);;
 
+	imwrite("/storage/emulated/0/test.png", img);
 
-	imwrite("/storage/emulated/test.png", img);
-
-	return myScore = computeScore(img, tpl, bestRect);
-
+	return myScore + 5;
 }
 
 
@@ -137,7 +142,7 @@ jfloat computeScore(Mat img, Mat tpl, Rect box){
 	for (i = 0;  i < tpl.rows; ++ i) {
 		for (j = 0; j < tpl.cols; ++ j) {
 			if (tpl.at<uchar>(Point(j,i)) == 0) {
-				img.at<uchar>(Point(j+box.x,i+box.y)) = 100;
+				img.at<uchar>(Point(j+box.x,i+box.y)) = 255;
 			}
 		}
 	}
@@ -151,5 +156,5 @@ jfloat computeScore(Mat img, Mat tpl, Rect box){
 
 	return score;
 }
-
+}
 
