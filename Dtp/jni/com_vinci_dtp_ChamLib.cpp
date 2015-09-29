@@ -30,11 +30,10 @@ static float chamfer(jlong addDrawing, jlong addImage) {
 	Mat& tpl = *(Mat*) addDrawing;
 	Mat& img = *(Mat*) addImage;
 
+	threshold(tpl,tpl,1,255,1);
+
 	cvtColor(img,img,CV_BGR2GRAY);
 	cvtColor(tpl,tpl,CV_BGR2GRAY);
-
-	/*Mat tpl = imread("/storage/emulated/0/logo.png", CV_LOAD_IMAGE_GRAYSCALE);
-	Mat img = imread("/storage/emulated/0/logo_in_clutter.png", CV_LOAD_IMAGE_GRAYSCALE);*/
 
 	imwrite("/storage/emulated/0/image1.png", tpl);
 	imwrite("/storage/emulated/0/image2.png", img);
@@ -142,7 +141,7 @@ jfloat computeScore(Mat img, Mat tpl, Rect box){
 	for (i = 0;  i < tpl.rows; ++ i) {
 		for (j = 0; j < tpl.cols; ++ j) {
 			if (tpl.at<uchar>(Point(j,i)) == 0) {
-				img.at<uchar>(Point(j+box.x,i+box.y)) = 255;
+				img.at<uchar>(Point(j+box.x,i+box.y)) = 100;
 			}
 		}
 	}

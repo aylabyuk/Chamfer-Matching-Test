@@ -2,10 +2,8 @@
 <resources>
 
     <string name="app_name">Dtp</string>
-    <string name="hello_world">Welcome to DTP test!</string>
     <string name="action_settings">Settings</string>
     <string name="image">image</string>
     <string name="drawing">drawing</string>
-    <string name="compute">Compute</string>
 
 </resources>

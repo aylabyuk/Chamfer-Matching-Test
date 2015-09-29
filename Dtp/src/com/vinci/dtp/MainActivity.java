@@ -4,24 +4,25 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
+
+import com.android.graphics.CanvasView;
 import com.vinci.dtp.R;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Paint;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,7 +30,9 @@ import android.widget.TextView;
 public class MainActivity extends Activity implements OnClickListener {
 	
 	private ImageView image;
-	private ImageView drawing;
+	private CanvasView canvasView;
+	private Button clearbtn;
+	private Button submitbtn;
 	private TextView output;
 
 	@Override
@@ -37,10 +40,21 @@ public class MainActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		this.image = (ImageView) super.findViewById(R.id.image);
-		this.drawing = (ImageView) super.findViewById(R.id.drawing);
-		this.output = (TextView) super.findViewById(R.id.score);
-		Button button = (Button) super.findViewById(R.id.computeBtn);
-		button.setOnClickListener(this);
+		this.canvasView = (CanvasView) super.findViewById(R.id.canvasView);
+		this.clearbtn = (Button) super.findViewById(R.id.clearbtn);
+		this.submitbtn = (Button) super.findViewById(R.id.submitbtn);
+		this.output = (TextView) super.findViewById(R.id.output);
+		
+	//setup canvas
+		canvasView.setPaintStrokeWidth(8F);
+		canvasView.setBlur(2F);
+		canvasView.setLineCap(Paint.Cap.ROUND);
+		canvasView.setMode(CanvasView.Mode.DRAW);
+		canvasView.setDrawer(CanvasView.Drawer.PEN);
+		
+		clearbtn.setOnClickListener(this);
+		submitbtn.setOnClickListener(this);
+		
 	}
 
 	@Override
@@ -85,48 +99,56 @@ public class MainActivity extends Activity implements OnClickListener {
 	    OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
 	}
 
-public void onClick(View view) {
+	@Override
+	public void onClick(View v) {
+		
+		if(v == clearbtn){
+			canvasView.clear();
+		} else {
+			computeScore();
+		}
+	}
+
+	private void computeScore() {
 		
 		final ProgressDialog dialog = ProgressDialog.show(this, "", "Calculating...", true);
-
+		
 		new AsyncTask<Void, Void, String>() {
 
 			@Override
 			protected String doInBackground(Void... params) {
-			
+				
+				Bitmap drawing = canvasView.getBitmap();
+				image.buildDrawingCache();
+				Bitmap imageBmap = image.getDrawingCache();
+				
+				Mat imageMat = new Mat();
+				Mat drawingMat = new Mat();
+				Utils.bitmapToMat(imageBmap, imageMat);
+				Utils.bitmapToMat(drawing, drawingMat);
 				
 				long t = System.currentTimeMillis();
-				
-				BitmapDrawable drawable1 = (BitmapDrawable) image.getDrawable();
-			    Bitmap imageBmap = drawable1.getBitmap();
-				
-			    BitmapDrawable drawable2 = (BitmapDrawable) drawing.getDrawable();
-			    Bitmap drawingBmap = drawable2.getBitmap();
-			    
-				Mat imageMat = new Mat(imageBmap.getHeight(), imageBmap.getWidth(), CvType.CV_8UC1);
-				Mat drawingMat = new Mat(drawingBmap.getHeight(), drawingBmap.getWidth(), CvType.CV_8UC1);
-				
-				Utils.bitmapToMat(imageBmap, imageMat);
-				Utils.bitmapToMat(drawingBmap, drawingMat);
-				
-				//Imgcodecs.imwrite("/storage/emulated/0/image1.png",imageMat);
-				//Imgcodecs.imwrite("/storage/emulated/0/image2.png",drawingMat);
 				
 				float result = 0;
 				result = ChamLib.getScore(drawingMat.getNativeObjAddr(), imageMat.getNativeObjAddr());
 				
+				
 				t = System.currentTimeMillis() - t;
 				
 				return String.format("Score is = %f in %d ms.", result, t);
+				
 			}
-
+			
 			@Override
 			protected void onPostExecute(String result) {
 				MainActivity.this.output.setText(result);
 				dialog.dismiss();
 			}
-
+			
+			
 		}.execute();
-
+		
 	}
+
+
 }
